@@ -3,7 +3,7 @@ import kagglehub
 import pandas as pd
 
 OUTPUT_DIR = "datasets"
-ARTICLE_COUNT = 50
+ARTICLE_COUNT = 100
 DATASET_NAME = "buzzfeed"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)

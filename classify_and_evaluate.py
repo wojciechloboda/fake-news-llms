@@ -30,6 +30,8 @@ def start_ollama_server():
     time.sleep(5)  
     return process
 
+import subprocess
+
 def pull_model(model_name):
     try:
         result = subprocess.run(
@@ -38,12 +40,20 @@ def pull_model(model_name):
             stderr=subprocess.PIPE,
             text=True,
         )
+        # Print the output from the command
+        if result.stdout:
+            print(result.stdout.strip())
+        if result.stderr:
+            print("Error Output:")
+            print(result.stderr.strip())
+        
         if result.returncode == 0:
             print(f"Model '{model_name}' is ready.")
         else:
             print(f"Error pulling model '{model_name}': {result.stderr.strip()}")
     except Exception as e:
         print(f"Exception pulling model: {e}")
+
 
 def ask_ollama(prompt, model="llama3"):
     url = "http://localhost:11434/api/generate"
