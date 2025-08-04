@@ -5,12 +5,13 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, classification_report
 import os
 import argparse
+import re
 
 BASE_PROMPT = (
-    "Carefully read the following news article and assess whether it is likely to be FAKE or REAL "
-    "based on its semantic content, coherence, plausibility, and tone. "
-    "Avoid guessing based on keywords—use reasoning. "
-    "Respond with only one word: FAKE or REAL.\n\n"
+    "You are a fact-checking expert. Carefully read the following news article and determine whether it is FAKE or REAL "
+    "based on its semantic content, coherence, plausibility, and tone. Do not rely on keywords—use critical reasoning.\n\n"
+    "IMPORTANT: Respond with ONE WORD ONLY — either FAKE or REAL.\n"
+    "Do NOT include any explanation or additional text.\n\n"
 )
 
 def is_ollama_running():
@@ -40,7 +41,6 @@ def pull_model(model_name):
             stderr=subprocess.PIPE,
             text=True,
         )
-        # Print the output from the command
         if result.stdout:
             print(result.stdout.strip())
         if result.stderr:
@@ -105,8 +105,13 @@ def evaluate_classification(df_true, df_pred, model_name, output_dir="metrics"):
     filename = f"{output_dir}/metrics_{model_name}.csv"
     df_metrics.to_csv(filename, index=False)
 
+
 def response_to_label(response: str) -> int:
+    # remove tage mainly for deepseek <think>
+    response = re.sub(r"<[^>]+>.*?</[^>]+>", "", response, flags=re.DOTALL)
+
     response = response.strip().upper()
+
     if response == "REAL":
         return 1
     elif response == "FAKE":
@@ -132,7 +137,6 @@ def evaluate_classification(df_true: pd.DataFrame, df_pred: pd.DataFrame, model_
     print(f"F1-score:  {f1:.4f}")
     print("\nDetailed Report:\n", classification_report(y_true, y_pred, target_names=["Fake", "Real"]))
 
-    # Save to metrics CSV
     metrics_df = pd.DataFrame([{
         'model': model_name,
         'accuracy': accuracy,

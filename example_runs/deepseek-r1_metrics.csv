@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score
+deepseek-r1,0.7,0.6301369863013698,0.9387755102040817,0.7540983606557377
